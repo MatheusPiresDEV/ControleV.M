@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup & Sincronização | Estrada Infinita</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #00d2ff;
+            --accent-neon: #00f5d4;
+            --accent-pink: #ff85a1;
+            --bg-dark: #02040a;
+            --card-bg: rgba(255, 255, 255, 0.06);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --text-main: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Navbar estilo Glass */
+        header {
+            width: 100%;
+            padding: 20px 5%;
+            background: rgba(8, 16, 38, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-neon));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-menu a:hover {
+            color: var(--accent-neon);
+        }
+
+        /* Container Principal */
+        main {
+            margin-top: 120px;
+            padding: 20px 5%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 120px);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .glass-container {
+            background: rgba(10, 15, 30, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        p.subtitle {
+            font-size: 0.95rem;
+            opacity: 0.75;
+            margin-bottom: 30px;
+        }
+
+        .backup-box {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            text-align: left;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 12px;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            resize: none;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 114, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00f5d4, #00bbf9);
+            color: #02040a;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 245, 212, 0.4);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--card-border);
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-route"></i> ESTRADA INFINITA
+        </div>
+        <ul class="nav-menu">
+            <li><a href="index.html"><i class="fa-solid fa-house"></i> Voltar ao Painel</a></li>
+        </ul>
+    </header>
+
+    <main>
+        <div class="glass-container">
+            <h2>Sincronização & Backup</h2>
+            <p class="subtitle">Exporte seus destinos planejados ou importe dados de outra máquina para manter sua rodagem atualizada.</p>
+            
+            <div class="backup-box">
+                <label><i class="fa-solid fa-link"></i> Link ou Código de Sincronização</label>
+                <textarea id="backup-string" placeholder="Clique em 'Gerar Link' para exportar ou cole um código válido aqui para importar..."></textarea>
+                
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="generateBackupLink()"><i class="fa-solid fa-gear"></i> Gerar Link</button>
+                    <button class="btn-secondary" onclick="copyBackup()"><i class="fa-solid fa-copy"></i> Copiar Link</button>
+                </div>
+
+                <hr>
+
+                <div class="btn-group">
+                    <button class="btn-success" onclick="importBackupTextarea()"><i class="fa-solid fa-file-import"></i> Confirmar Importação Manual</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- 1. CANVAS BACKGROUND INTERATIVO (Sincronizado) ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2, targetX: window.innerWidth / 2, targetSpeed: 0.6 };
+        let speed = 0.6; 
+        let horizonY;
+        let roadLines = [];
+        let stars = [];
+        let isNight = true;
+
+        const currentHour = new Date().getHours();
+        isNight = currentHour < 6 || currentHour >= 18; 
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            horizonY = canvas.height * 0.58; 
+            
+            stars = [];
+            if (isNight) {
+                for(let i = 0; i < 45; i++) {
+                    stars.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * horizonY,
+                        size: Math.random() * 1.2 + 0.5,
+                        baseAlpha: Math.random() * 0.4 + 0.2
+                    });
+                }
+            }
+
+            roadLines = [];
+            const totalLines = 12;
+            for(let i = 0; i < totalLines; i++) {
+                roadLines.push((i / totalLines) * 100);
+            }
+        }
+
+        window.addEventListener('mousemove', (e) => { mouse.targetX = e.clientX; });
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            mouse.x += (mouse.targetX - mouse.x) * 0.04;
+            let curveFactor = (mouse.x - canvas.width / 2) / (canvas.width / 2);
+
+            let skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+            if (isNight) {
+                skyGrad.addColorStop(0, '#02040a');
+                skyGrad.addColorStop(0.6, '#081026');
+                skyGrad.addColorStop(0.9, '#111f42');
+                skyGrad.addColorStop(1, '#1b2d5a');
+            } else {
+                skyGrad.addColorStop(0, '#1a1c4b');  
+                skyGrad.addColorStop(0.4, '#3b1c55'); 
+                skyGrad.addColorStop(0.7, '#832161'); 
+                skyGrad.addColorStop(0.9, '#da4453'); 
+                skyGrad.addColorStop(1, '#f6bb42');   
+            }
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, canvas.width, horizonY);
+
+            if (isNight) {
+                stars.forEach(star => {
+                    ctx.fillStyle = `rgba(0, 210, 255, ${star.baseAlpha})`;
+                    ctx.beginPath();
+                    ctx.arc(star.x - (curveFactor * 15), star.y, star.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+
+            let roadGrad = ctx.createLinearGradient(0, horizonY, 0, canvas.height);
+            if (isNight) {
+                roadGrad.addColorStop(0, '#0a0d1a');
+                roadGrad.addColorStop(1, '#03050a');
+            } else {
+                roadGrad.addColorStop(0, '#1f1924'); 
+                roadGrad.addColorStop(1, '#0d0a10');
+            }
+            ctx.fillStyle = roadGrad;
+            ctx.fillRect(0, horizonY, canvas.width, canvas.height - horizonY);
+
+            let centerX = canvas.width / 2 + (curveFactor * 100);
+
+            roadLines.forEach((progress, index) => {
+                progress += speed;
+                if (progress >= 100) progress = 0;
+                roadLines[index] = progress;
+
+                let normZ = progress / 100;
+                let perspectiveY = horizonY + (normZ * normZ) * (canvas.height - horizonY);
+                let roadWidth = normZ * canvas.width * 0.45;
+                let opacity = normZ;
+
+                ctx.strokeStyle = isNight ? `rgba(0, 245, 212, ${opacity * 0.25})` : `rgba(255, 133, 161, ${opacity * 0.35})`;
+                ctx.lineWidth = 1 + normZ * 2;
+                ctx.beginPath();
+                ctx.moveTo(centerX - roadWidth / 2, perspectiveY);
+                ctx.lineTo(centerX + roadWidth / 2, perspectiveY);
+                ctx.stroke();
+
+                if (Math.sin(progress * 0.2) > 0) {
+                    ctx.strokeStyle = `rgba(255, 211, 42, ${opacity * 0.6})`;
+                    ctx.lineWidth = 1 + normZ * 3;
+                    ctx.beginPath();
+                    let lineLength = 10 + normZ * 30;
+                    ctx.moveTo(centerX + (curveFactor * normZ * 30), perspectiveY);
+                    ctx.lineTo(centerX + (curveFactor * normZ * 30), perspectiveY + lineLength > canvas.height ? canvas.height : perspectiveY + lineLength);
+                    ctx.stroke();
+                }
+            });
+
+            ctx.strokeStyle = isNight ? 'rgba(0, 210, 255, 0.15)' : 'rgba(234, 95, 148, 0.2)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX, horizonY);
+            ctx.lineTo(canvas.width / 2 - canvas.width * 0.225 + (curveFactor * 100), canvas.height);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(centerX, horizonY);
+            ctx.lineTo(canvas.width / 2 + canvas.width * 0.225 + (curveFactor * 100), canvas.height);
+            ctx.stroke();
+
+            let atmosphericGlow = ctx.createLinearGradient(0, horizonY - 60, 0, horizonY + 40);
+            if (isNight) {
+                atmosphericGlow.addColorStop(0, 'rgba(27, 45, 90, 0)');
+                atmosphericGlow.addColorStop(0.6, 'rgba(27, 45, 90, 0.8)'); 
+                atmosphericGlow.addColorStop(1, 'rgba(10, 13, 26, 0)');     
+            } else {
+                atmosphericGlow.addColorStop(0, 'rgba(246, 187, 66, 0)');
+                atmosphericGlow.addColorStop(0.6, 'rgba(246, 187, 66, 0.5)'); 
+                atmosphericGlow.addColorStop(1, 'rgba(31, 25, 36, 0)');
+            }
+            ctx.fillStyle = atmosphericGlow;
+            ctx.fillRect(0, horizonY - 60, canvas.width, 100);
+
+            requestAnimationFrame(animateCanvas);
+        }
+
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+        animateCanvas();
+
+        // --- 2. TRATAMENTO DE SESSÃO FLUIDO + AUTO IMPORT VIA URL ---
+        window.addEventListener('DOMContentLoaded', () => {
+            let activeSession = sessionStorage.getItem('eh_session');
+            
+            if(!activeSession) {
+                sessionStorage.setItem('eh_session', 'guest');
+                activeSession = 'guest';
+            }
+            
+            const mainEl = document.querySelector('main');
+            if(mainEl) mainEl.style.opacity = '1';
+
+            // Verifica se há dados para importação automática na URL (?import=...)
+            const urlParams = new URLSearchParams(window.location.search);
+            const importData = urlParams.get('import');
+            
+            if (importData) {
+                try {
+                    const decrypted = decodeURIComponent(escape(atob(importData)));
+                    JSON.parse(decrypted); 
+                    
+                    const storageKey = activeSession === 'admin' ? 'explore_destinations' : 'guest_destinations';
+                    localStorage.setItem(storageKey, decrypted);
+                    
+                    alert("Sincronização via link realizada com sucesso!");
+                    window.location.href = "index.html";
+                } catch(e) {
+                    alert("O link de importação usado está corrompido ou é inválido.");
+                }
+            }
+        });
+
+        // --- 3. EXPORTAR/IMPORTAR SEPARADO POR PERFIL ---
+        function generateBackupLink() {
+            const role = sessionStorage.getItem('eh_session') || 'guest';
+            const storageKey = role === 'admin' ? 'explore_destinations' : 'guest_destinations';
+            const data = localStorage.getItem(storageKey);
+            
+            if(!data || data === "[]") {
+                alert("Nenhum destino salvo neste perfil para exportar ainda.");
+                return;
+            }
+            const encryptedData = btoa(unescape(encodeURIComponent(data)));
+            const shareableLink = `${window.location.origin}${window.location.pathname}?import=${encryptedData}`;
+            document.getElementById('backup-string').value = shareableLink;
+        }
+
+        function copyBackup() {
+            const txt = document.getElementById('backup-string');
+            if(!txt.value) { alert("Gere o link antes de copiar."); return; }
+            txt.select();
+            document.execCommand('copy');
+            alert("Link de sincronização copiado com sucesso!");
+        }
+
+        function importBackupTextarea() {
+            const txtValue = document.getElementById('backup-string').value.trim();
+            if(!txtValue) { alert("Cole o código ou link na caixa antes."); return; }
+            
+            try {
+                let cleanCode = txtValue.includes('?import=') ? txtValue.split('?import=')[1] : txtValue;
+                const decrypted = decodeURIComponent(escape(atob(cleanCode)));
+                JSON.parse(decrypted);
+                
+                const role = sessionStorage.getItem('eh_session') || 'guest';
+                const storageKey = role === 'admin' ? 'explore_destinations' : 'guest_destinations';
+                
+                localStorage.setItem(storageKey, decrypted);
+                alert("Importação manual concluída com sucesso!");
+                window.location.href = "index.html";
+            } catch(e) {
+                alert("Código ou link de sincronização inválido.");
+            }
+        }
+    </script>
+</body>
+</html>

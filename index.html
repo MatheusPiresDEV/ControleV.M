@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExploreHorizon - Painel de Turismo Expandido</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="toast-container"></div>
+
+    <div id="auth-overlay" class="modal" style="display: flex; background: rgba(3, 5, 10, 0.85); backdrop-filter: blur(10px); z-index: 10000;">
+        <div class="modal-content glass-card" style="max-width: 450px; text-align: center; padding: 40px 30px;">
+            <div class="logo" style="font-size: 2rem; margin-bottom: 20px; float: none;">
+                <i class="fa-solid fa-compass animate-compass"></i> Explore<span>Horizon</span>
+            </div>
+            <p style="color: rgba(255,255,255,0.8); margin-bottom: 25px;">Seja bem-vindo à nossa rodovia virtual. Quem está pilotando hoje?</p>
+            
+            <div id="auth-choices" style="display: flex; flex-direction: column; gap: 15px;">
+                <button class="btn-primary" onclick="showAdminPasswordInput()" style="padding: 14px;"><i class="fa-solid fa-user-shield"></i> Entrar como Matheus (Admin)</button>
+                <button class="btn-secondary" onclick="enterAsGuest()" style="padding: 14px; background: rgba(255,255,255,0.05);"><i class="fa-solid fa-user-astronaut"></i> Modo Visitante (Testar App)</button>
+            </div>
+
+            <div id="admin-auth-box" style="display: none; margin-top: 15px;">
+                <label for="admin-pass" style="display:block; text-align:left; margin-bottom:8px; font-size:0.9rem;">Digite a Chave de Ignição:</label>
+                <input type="password" id="admin-pass" placeholder="••••••••" style="width:100%; padding:12px; margin-bottom:15px; text-align:center;">
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-secondary" onclick="backToChoices()" style="flex:1;">Voltar</button>
+                    <button class="btn-primary" onclick="verifyAdminPassword()" style="flex:2;">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <i class="fa-solid fa-compass animate-compass"></i> Explore<span>Horizon</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="#cadastro" class="nav-link active">Cadastrar</a>
+                <a href="#dashboard" class="nav-link">Dashboard</a>
+                <a href="backup.html" class="nav-link">Backup & Transf.</a>
+                <a href="#" class="nav-link" onclick="logoutSession()" style="color: var(--accent-red);"><i class="fa-solid fa-power-off"></i> Sair</a>
+            </nav>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container-fluid" style="opacity: 0; transition: opacity 0.4s ease;">
+        
+        <section id="life-stats" class="glass-card" style="margin-bottom: 24px; text-align: center; display: none;">
+            <h2 style="margin-bottom: 8px;"><i class="fa-solid fa-hourglass-half"></i> Linha do Tempo Pessoal</h2>
+            <p id="welcome-stats" style="font-size: 1.15rem; margin-bottom: 15px;"></p>
+            <div id="bday-countdown" style="font-size: 1.05rem; padding: 10px; border-top: 1px solid rgba(255,255,255,0.1);"></div>
+        </section>
+
+        <section id="guest-profile-setup" class="glass-card" style="margin-bottom: 24px; text-align: center; display: none;">
+            <h2><i class="fa-solid fa-timeline"></i> Monte sua própria Linha do Tempo!</h2>
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 25px;">Como você está no modo visitante, insira seus dados para ver os contadores rodando em tempo real com a sua idade.</p>
+            
+            <div class="profile-form-group" style="display: flex; flex-direction: column; gap: 18px; text-align: left; max-width: 500px; margin: 0 auto 25px auto;">
+                <label style="color: #00f5d4; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-user"></i> Seu Nome
+                </label>
+                <input type="text" id="guest-name-input" placeholder="Ex: Piloto Viajante" style="width: 100%; padding: 12px 16px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #fff;">
+                
+                <label style="color: #00f5d4; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; margin-top: 5px;">
+                    <i class="fa-solid fa-calendar-day"></i> Data de Nascimento
+                </label>
+                <input type="date" id="guest-bday-input" style="width: 100%; padding: 12px 16px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #fff;">
+            </div>
+            
+            <button class="btn-primary" onclick="saveGuestProfile()" style="max-width: 500px; margin: 0 auto; width: 100%; padding: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <i class="fa-solid fa-key"></i> Ligar Motores
+            </button>
+        </section>
+
+        <section id="cadastro" class="glass-card">
+            <h2><i class="fa-solid fa-map-location-dot"></i> Novo Destino</h2>
+            <form id="destination-form">
+                <div class="input-row" style="margin-bottom: 15px;">
+                    <div class="input-group flex-2">
+                        <label for="place-name">Nome do Lugar</label>
+                        <input type="text" id="place-name" placeholder="Ex: Serra do Rio do Rastro, SC" required>
+                    </div>
+                    
+                    <div class="switch-group flex-1">
+                        <label>Você já foi?</label>
+                        <div class="switch-wrapper">
+                            <label class="switch">
+                                <input type="checkbox" id="visited-status">
+                                <span class="slider round"></span>
+                            </label>
+                            <span id="status-text">Não fui ainda</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-row" style="margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
+                    <div class="input-group" style="flex: 1; min-width: 150px;">
+                        <label for="transport-type">Meio de Transporte</label>
+                        <select id="transport-type" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 8px;">
+                            <option value="Moto">Moto</option>
+                            <option value="Carro">Carro</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                    <div class="input-group" style="flex: 1; min-width: 180px;">
+                        <label for="vehicle-model">Modelo do Veículo</label>
+                        <input type="text" id="vehicle-model" placeholder="Ex: Lander 250 / Carro">
+                    </div>
+                    <div class="input-group" style="flex: 1; min-width: 120px;">
+                        <label for="trip-km">KM Rodados</label>
+                        <input type="number" id="trip-km" placeholder="Ex: 280" min="0">
+                    </div>
+                    <div class="input-group" style="flex: 1; min-width: 120px;">
+                        <label for="trip-days">Dias de Viagem</label>
+                        <input type="number" id="trip-days" placeholder="Ex: 1" min="1">
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <button type="submit" class="btn-primary"><i class="fa-solid fa-plus"></i> Adicionar à Lista</button>
+                </div>
+            </form>
+        </section>
+
+        <section id="dashboard">
+            <div class="stats-container">
+                <div class="stat-card glass-card">
+                    <h3 id="total-visited">0</h3>
+                    <p>Destinos Visitados</p>
+                </div>
+                <div class="stat-card glass-card">
+                    <h3 id="total-pending">0</h3>
+                    <p>Quero Conhecer</p>
+                </div>
+            </div>
+
+            <div class="dashboard-header">
+                <h2><i class="fa-solid fa-images"></i> Seus Destinos Explorados</h2>
+            </div>
+            
+            <div id="cards-grid" class="cards-grid"></div>
+        </section>
+    </main>
+
+    <div id="photo-modal" class="modal">
+        <div class="modal-content glass-card">
+            <span class="close-btn" onclick="closeModal('photo-modal')">&times;</span>
+            <h3><i class="fa-solid fa-camera"></i> Gerenciar Fotos</h3>
+            <p class="modal-subtitle">Adicione ou remova lembranças deste destino</p>
+            
+            <div class="upload-zone">
+                <input type="file" id="file-input" accept="image/*" multiple style="display:none">
+                <label for="file-input" class="upload-label">
+                    <i class="fa-solid fa-cloud-arrow-up size-lg"></i>
+                    <span>Clique para fazer upload de fotos</span>
+                    <span class="file-limit">Máximo 1.5MB por imagem</span>
+                </label>
+            </div>
+            
+            <div id="upload-loader" class="loader-inline" style="display: none;">
+                <i class="fa-solid fa-spinner fa-spin"></i> Processando e compactando imagens...
+            </div>
+
+            <div id="modal-photos-preview" class="modal-photos-preview"></div>
+        </div>
+    </div>
+
+    <div id="lightbox-modal" class="modal lightbox" onclick="closeModal('lightbox-modal')">
+        <span class="close-btn">&times;</span>
+        <img id="lightbox-img" src="" alt="Imagem Ampliada">
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
