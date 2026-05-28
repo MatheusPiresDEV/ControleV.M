@@ -10,6 +10,7 @@
     --success-color: #2ed573;
 }
 
+/* --- CONFIGURAÇÕES GERAIS E RESETS --- */
 * {
     margin: 0; padding: 0; box-sizing: border-box;
     font-family: 'Segoe UI', Roboto, sans-serif;
@@ -22,14 +23,94 @@ body {
     min-height: 100vh;
 }
 
+/* --- GARANTIA DO PLANO DE FUNDO EM TODAS AS ABAS --- */
 #bg-canvas {
-    position: fixed; top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    z-index: -1;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1; /* Fica sempre atrás de tudo */
     pointer-events: none;
 }
 
-/* Modificado para telas grandes/Ultrawide */
+/* --- MODAIS ULTRA-PREMIUM (GLASSMORPHISM) --- */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(3, 5, 10, 0.85) !important; /* Fundo escuro sutil */
+    backdrop-filter: blur(12px) !important; /* Desfoque do fundo */
+    -webkit-backdrop-filter: blur(12px);
+    display: none; /* Padrão: Escondido */
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.25s ease-out;
+}
+
+/* Classe utilitária que o seu JS deve ativar (ex: modal.classList.add('show')) */
+.modal.show, .modal.active {
+    display: flex !important;
+}
+
+.modal-content.glass-card, .modal-content {
+    width: 92%;
+    max-width: 550px;
+    position: relative;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px);
+    padding: 40px 30px;
+    transition: all 0.3s ease;
+    animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-subtitle { color: var(--text-muted); font-size: 0.9rem; margin: -10px 0 20px 0; }
+.close-btn { position: absolute; top: 20px; right: 25px; font-size: 2rem; cursor: pointer; color: var(--text-muted); transition: 0.2s;}
+.close-btn:hover { color: #fff; }
+
+/* --- ESTILIZAÇÃO DOS INPUTS DENTRO DOS MODAIS --- */
+.modal-content input[type="text"],
+.modal-content input[type="password"],
+.modal-content input[type="date"],
+.modal-content input[type="number"] {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+    color: #fff !important;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.modal-content input:focus {
+    outline: none;
+    border-color: #00f5d4 !important; /* Neon principal ao focar */
+    box-shadow: 0 0 12px rgba(0, 245, 212, 0.2);
+    background: rgba(0, 0, 0, 0.7) !important;
+}
+
+.modal-content label {
+    color: #00f5d4;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* --- ESTRUTURA DO LAYOUT --- */
 .container-fluid {
     width: 100%;
     max-width: 1800px; /* Expande consideravelmente em monitores grandes */
@@ -41,7 +122,7 @@ body {
     .container-fluid { padding: 0 20px; }
 }
 
-/* Glassmorphism Efeito */
+/* Glassmorphism Efeito Global */
 .glass-card {
     background: var(--card-bg);
     backdrop-filter: blur(20px);
@@ -130,11 +211,11 @@ input:checked + .slider:before { transform: translateX(22px); }
 /* Grid adaptável gigante */
 .cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); /* Aumentado o tamanho mínimo do card */
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
     gap: 30px; margin-top: 25px;
 }
 
-/* Cards */
+/* Cards de Destinos */
 .dest-card { display: flex; flex-direction: column; justify-content: space-between; height: 100%; transition: transform 0.3s, border-color 0.3s; }
 .dest-card:hover { transform: translateY(-5px); border-color: rgba(0,210,255,0.25); }
 .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
@@ -145,7 +226,7 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 .time-elapsed { font-size: 0.85rem; color: var(--text-muted); margin: 12px 0; display: flex; align-items: center; gap: 6px;}
 
-/* Carrossel aprimorado */
+/* Carrossel */
 .carousel-container {
     position: relative; width: 100%; height: 220px;
     border-radius: 12px; overflow: hidden; margin-bottom: 20px;
@@ -173,18 +254,6 @@ input:checked + .slider:before { transform: translateX(22px); }
 .card-actions { display: flex; flex-direction: column; gap: 12px; }
 .action-row { display: flex; gap: 12px; }
 .action-row button { flex: 1; padding: 12px; }
-
-/* Modais Modernizados */
-.modal {
-    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(3, 5, 10, 0.85); backdrop-filter: blur(12px);
-    z-index: 2000; align-items: center; justify-content: center;
-    animation: fadeIn 0.25s ease-out;
-}
-.modal-content { width: 92%; max-width: 550px; position: relative; animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-.modal-subtitle { color: var(--text-muted); font-size: 0.9rem; margin: -10px 0 20px 0; }
-.close-btn { position: absolute; top: 20px; right: 25px; font-size: 2rem; cursor: pointer; color: var(--text-muted); transition: 0.2s;}
-.close-btn:hover { color: #fff; }
 
 /* Área de Upload */
 .upload-zone { margin-bottom: 20px; }
@@ -232,8 +301,7 @@ input:checked + .slider:before { transform: translateX(22px); }
 .toast.danger { border-left-color: var(--accent-red); }
 .toast i { font-size: 1.2rem; }
 
-/* --- ESTILIZAÇÃO DO SETUP DE PERFIL DO VISITANTE --- */
-
+/* --- SETUP DE PERFIL DO VISITANTE --- */
 #guest-profile-setup {
     margin: 20px auto;
     max-width: 550px;
@@ -249,18 +317,16 @@ input:checked + .slider:before { transform: translateX(22px); }
     transition: all 0.3s ease;
 }
 
-/* Título Chamativo */
 #guest-profile-setup h2 {
     font-size: 1.6rem;
     font-weight: 700;
     margin-bottom: 10px;
-    background: linear-gradient(45deg, var(--primary-color, #00d2ff), var(--accent-neon, #00f5d4));
+    background: linear-gradient(45deg, var(--primary-color, #00d2ff), var(--secondary-color, #00f5d4));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: 0.5px;
 }
 
-/* Subtítulo / Texto explicativo */
 #guest-profile-setup p {
     font-size: 0.95rem;
     line-height: 1.5;
@@ -269,7 +335,6 @@ input:checked + .slider:before { transform: translateX(22px); }
     margin-bottom: 25px;
 }
 
-/* Container que organiza os campos */
 .profile-form-group {
     display: flex;
     flex-direction: column;
@@ -278,20 +343,18 @@ input:checked + .slider:before { transform: translateX(22px); }
     margin-bottom: 25px;
 }
 
-/* Labels dos Inputs */
 .profile-form-group label {
     font-size: 0.85rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: var(--accent-neon, #00f5d4);
+    color: var(--secondary-color);
     margin-bottom: -8px;
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-/* Inputs de Texto e Data Estilizados */
 #guest-name-input,
 #guest-bday-input {
     width: 100%;
@@ -305,21 +368,18 @@ input:checked + .slider:before { transform: translateX(22px); }
     transition: all 0.3s ease;
 }
 
-/* Efeito de Focus nos campos (Acende o Neon) */
 #guest-name-input:focus,
 #guest-bday-input:focus {
-    border-color: var(--accent-neon, #00f5d4);
+    border-color: var(--secondary-color);
     box-shadow: 0 0 12px rgba(0, 245, 212, 0.25);
     background: rgba(0, 0, 0, 0.6);
 }
 
-/* Customização do ícone de calendário nativo do input date */
 #guest-bday-input::-webkit-calendar-picker-indicator {
-    filter: invert(1) sepia(1) saturate(5) hue-rotate(135deg); /* Deixa o ícone neon */
+    filter: invert(1) sepia(1) saturate(5) hue-rotate(135deg);
     cursor: pointer;
 }
 
-/* Botão de Salvar Perfil */
 #guest-profile-setup button {
     width: 100%;
     padding: 14px;
@@ -348,10 +408,11 @@ input:checked + .slider:before { transform: translateX(22px); }
     transform: translateY(0);
 }
 
-/* Hamburger e Animações */
+/* --- DESIGN RESPONSIVO MOBILE / HAMBURGER --- */
 .hamburger { display: none; cursor: pointer; }
 .bar { display: block; width: 25px; height: 3px; margin: 5px auto; transition: 0.3s; background-color: var(--text-main); }
 
+/* --- ANIMAÇÕES --- */
 @keyframes spin { 100% { transform: rotate(360deg); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

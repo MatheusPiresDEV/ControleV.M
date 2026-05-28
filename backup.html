@@ -92,7 +92,7 @@
             color: var(--accent-neon);
         }
 
-        /* Container Principal */
+        /* Container Principal Otimizado para Telas Grandes */
         main {
             margin-top: 120px;
             padding: 20px 5%;
@@ -112,7 +112,7 @@
             border-radius: 16px;
             padding: 40px;
             width: 100%;
-            max-width: 650px;
+            max-width: 750px; /* Alargado sutilmente para monitores maiores */
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             text-align: center;
         }
@@ -148,7 +148,7 @@
 
         textarea {
             width: 100%;
-            height: 120px;
+            height: 140px;
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid var(--card-border);
             border-radius: 8px;
@@ -232,7 +232,7 @@
 
     <header>
         <div class="logo">
-            <i class="fa-solid fa-route"></i> ESTRADA INFINITA
+            <i class="fa-solid fa-compass"></i> Explore<span>Horizon</span>
         </div>
         <ul class="nav-menu">
             <li><a href="index.html"><i class="fa-solid fa-house"></i> Voltar ao Painel</a></li>
@@ -241,15 +241,15 @@
 
     <main>
         <div class="glass-container">
-            <h2>Sincronização & Backup</h2>
-            <p class="subtitle">Exporte seus destinos planejados ou importe dados de outra máquina para manter sua rodagem atualizada.</p>
+            <h2>Sincronização & Backup Global</h2>
+            <p class="subtitle">Exporte ou importe a garagem completa: rotas, histórico de abastecimentos com consumo médio e cronograma de manutenção de componentes.</p>
             
             <div class="backup-box">
-                <label><i class="fa-solid fa-link"></i> Link ou Código de Sincronização</label>
-                <textarea id="backup-string" placeholder="Clique em 'Gerar Link' para exportar ou cole um código válido aqui para importar..."></textarea>
+                <label><i class="fa-solid fa-link"></i> Link de Backup Unificado</label>
+                <textarea id="backup-string" placeholder="Clique em 'Gerar Link' para consolidar os dados da garagem e consumo ou cole um link gerado aqui para sincronizar..."></textarea>
                 
                 <div class="btn-group">
-                    <button class="btn-primary" onclick="generateBackupLink()"><i class="fa-solid fa-gear"></i> Gerar Link</button>
+                    <button class="btn-primary" onclick="generateBackupLink()"><i class="fa-solid fa-gears"></i> Gerar Link Completo</button>
                     <button class="btn-secondary" onclick="copyBackup()"><i class="fa-solid fa-copy"></i> Copiar Link</button>
                 </div>
 
@@ -405,31 +405,37 @@
         initCanvas();
         animateCanvas();
 
-        // --- 2. TRATAMENTO DE SESSÃO FLUIDO + AUTO IMPORT VIA URL ---
+
+        // --- 2. TRATAMENTO DE SESSÃO FLUIDO + AUTO IMPORT VIA URL (MÚLTIPLAS CHAVES) ---
         window.addEventListener('DOMContentLoaded', () => {
             let activeSession = sessionStorage.getItem('eh_session');
-            
             if(!activeSession) {
                 sessionStorage.setItem('eh_session', 'guest');
                 activeSession = 'guest';
             }
+            const prefix = activeSession === 'admin' ? 'admin_' : 'guest_';
+            const destKey = activeSession === 'admin' ? 'explore_destinations' : 'guest_destinations';
             
             const mainEl = document.querySelector('main');
             if(mainEl) mainEl.style.opacity = '1';
 
-            // Verifica se há dados para importação automática na URL (?import=...)
+            // Captura parâmetros da URL
             const urlParams = new URLSearchParams(window.location.search);
             const importData = urlParams.get('import');
             
             if (importData) {
                 try {
                     const decrypted = decodeURIComponent(escape(atob(importData)));
-                    JSON.parse(decrypted); 
+                    const packageData = JSON.parse(decrypted); 
                     
-                    const storageKey = activeSession === 'admin' ? 'explore_destinations' : 'guest_destinations';
-                    localStorage.setItem(storageKey, decrypted);
+                    // Valida e extrai o pacote completo injetando no localStorage correspondente
+                    if(packageData.destinations) localStorage.setItem(destKey, JSON.stringify(packageData.destinations));
+                    if(packageData.garage) localStorage.setItem(prefix + 'garage', JSON.stringify(packageData.garage));
+                    if(packageData.fuel) localStorage.setItem(prefix + 'fuel_records', JSON.stringify(packageData.fuel));
+                    if(packageData.maint) localStorage.setItem(prefix + 'maint_records', JSON.stringify(packageData.maint));
+                    if(packageData.reminders) localStorage.setItem(prefix + 'reminders', JSON.stringify(packageData.reminders));
                     
-                    alert("Sincronização via link realizada com sucesso!");
+                    alert("Sincronização de dados da garagem realizada com sucesso!");
                     window.location.href = "index.html";
                 } catch(e) {
                     alert("O link de importação usado está corrompido ou é inválido.");
@@ -437,18 +443,32 @@
             }
         });
 
-        // --- 3. EXPORTAR/IMPORTAR SEPARADO POR PERFIL ---
+
+        // --- 3. EXPORTAR/IMPORTAR CONJUNTO UNIFICADO DE CHAVES ---
         function generateBackupLink() {
             const role = sessionStorage.getItem('eh_session') || 'guest';
-            const storageKey = role === 'admin' ? 'explore_destinations' : 'guest_destinations';
-            const data = localStorage.getItem(storageKey);
+            const prefix = role === 'admin' ? 'admin_' : 'guest_';
+            const destKey = role === 'admin' ? 'explore_destinations' : 'guest_destinations';
+
+            // Coleta todas as estruturas criadas nas alterações anteriores
+            const packageData = {
+                destinations: JSON.parse(localStorage.getItem(destKey)) || [],
+                garage: JSON.parse(localStorage.getItem(prefix + 'garage')) || null,
+                fuel: JSON.parse(localStorage.getItem(prefix + 'fuel_records')) || [],
+                maint: JSON.parse(localStorage.getItem(prefix + 'maint_records')) || [],
+                reminders: JSON.parse(localStorage.getItem(prefix + 'reminders')) || []
+            };
             
-            if(!data || data === "[]") {
-                alert("Nenhum destino salvo neste perfil para exportar ainda.");
+            // Verifica se existe alguma informação útil para ser exportada
+            if (packageData.destinations.length === 0 && !packageData.garage && packageData.fuel.length === 0 && packageData.maint.length === 0) {
+                alert("Nenhum registro localizado neste perfil para exportar ainda.");
                 return;
             }
-            const encryptedData = btoa(unescape(encodeURIComponent(data)));
+
+            const stringified = JSON.stringify(packageData);
+            const encryptedData = btoa(unescape(encodeURIComponent(stringified)));
             const shareableLink = `${window.location.origin}${window.location.pathname}?import=${encryptedData}`;
+            
             document.getElementById('backup-string').value = shareableLink;
         }
 
@@ -457,7 +477,7 @@
             if(!txt.value) { alert("Gere o link antes de copiar."); return; }
             txt.select();
             document.execCommand('copy');
-            alert("Link de sincronização copiado com sucesso!");
+            alert("Link de sincronização unificado copiado!");
         }
 
         function importBackupTextarea() {
@@ -467,13 +487,20 @@
             try {
                 let cleanCode = txtValue.includes('?import=') ? txtValue.split('?import=')[1] : txtValue;
                 const decrypted = decodeURIComponent(escape(atob(cleanCode)));
-                JSON.parse(decrypted);
+                const packageData = JSON.parse(decrypted);
                 
                 const role = sessionStorage.getItem('eh_session') || 'guest';
-                const storageKey = role === 'admin' ? 'explore_destinations' : 'guest_destinations';
+                const prefix = role === 'admin' ? 'admin_' : 'guest_';
+                const destKey = role === 'admin' ? 'explore_destinations' : 'guest_destinations';
                 
-                localStorage.setItem(storageKey, decrypted);
-                alert("Importação manual concluída com sucesso!");
+                // Grava de forma limpa cada estrutura recuperada
+                if(packageData.destinations) localStorage.setItem(destKey, JSON.stringify(packageData.destinations));
+                if(packageData.garage) localStorage.setItem(prefix + 'garage', JSON.stringify(packageData.garage));
+                if(packageData.fuel) localStorage.setItem(prefix + 'fuel_records', JSON.stringify(packageData.fuel));
+                if(packageData.maint) localStorage.setItem(prefix + 'maint_records', JSON.stringify(packageData.maint));
+                if(packageData.reminders) localStorage.setItem(prefix + 'reminders', JSON.stringify(packageData.reminders));
+
+                alert("Importação e sincronização completas concluídas com sucesso!");
                 window.location.href = "index.html";
             } catch(e) {
                 alert("Código ou link de sincronização inválido.");

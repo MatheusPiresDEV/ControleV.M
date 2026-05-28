@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ExploreHorizon - Painel de Turismo Expandido</title>
-    <link rel="stylesheet" href="style.css">
+    <link class="html-css" rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -12,6 +12,7 @@
 
     <div id="toast-container"></div>
 
+    <!-- Modal de Autenticação Inicial -->
     <div id="auth-overlay" class="modal" style="display: flex; background: rgba(3, 5, 10, 0.85); backdrop-filter: blur(10px); z-index: 10000;">
         <div class="modal-content glass-card" style="max-width: 450px; text-align: center; padding: 40px 30px;">
             <div class="logo" style="font-size: 2rem; margin-bottom: 20px; float: none;">
@@ -35,6 +36,7 @@
         </div>
     </div>
 
+    <!-- Barra de Navegação Superior -->
     <header>
         <div class="navbar">
             <div class="logo">
@@ -43,6 +45,7 @@
             <nav class="nav-menu">
                 <a href="#cadastro" class="nav-link active">Cadastrar</a>
                 <a href="#dashboard" class="nav-link">Dashboard</a>
+                <a href="manutencao.html" class="nav-link"><i class="fa-solid fa-wrench"></i> Garagem & Custos</a>
                 <a href="backup.html" class="nav-link">Backup & Transf.</a>
                 <a href="#" class="nav-link" onclick="logoutSession()" style="color: var(--accent-red);"><i class="fa-solid fa-power-off"></i> Sair</a>
             </nav>
@@ -54,14 +57,17 @@
         </div>
     </header>
 
+    <!-- Conteúdo Principal do Painel -->
     <main class="container-fluid" style="opacity: 0; transition: opacity 0.4s ease;">
         
+        <!-- Painel de Estatísticas de Idade -->
         <section id="life-stats" class="glass-card" style="margin-bottom: 24px; text-align: center; display: none;">
             <h2 style="margin-bottom: 8px;"><i class="fa-solid fa-hourglass-half"></i> Linha do Tempo Pessoal</h2>
             <p id="welcome-stats" style="font-size: 1.15rem; margin-bottom: 15px;"></p>
             <div id="bday-countdown" style="font-size: 1.05rem; padding: 10px; border-top: 1px solid rgba(255,255,255,0.1);"></div>
         </section>
 
+        <!-- Configuração de Perfil do Visitante -->
         <section id="guest-profile-setup" class="glass-card" style="margin-bottom: 24px; text-align: center; display: none;">
             <h2><i class="fa-solid fa-timeline"></i> Monte sua própria Linha do Tempo!</h2>
             <p style="color: rgba(255,255,255,0.7); margin-bottom: 25px;">Como você está no modo visitante, insira seus dados para ver os contadores rodando em tempo real com a sua idade.</p>
@@ -83,6 +89,7 @@
             </button>
         </section>
 
+        <!-- Formulário de Cadastro de Destinos -->
         <section id="cadastro" class="glass-card">
             <h2><i class="fa-solid fa-map-location-dot"></i> Novo Destino</h2>
             <form id="destination-form">
@@ -133,6 +140,7 @@
             </form>
         </section>
 
+        <!-- Dashboard Geral de Cartões -->
         <section id="dashboard">
             <div class="stats-container">
                 <div class="stat-card glass-card">
@@ -153,6 +161,7 @@
         </section>
     </main>
 
+    <!-- Modal para Gerenciamento de Upload de Fotos -->
     <div id="photo-modal" class="modal">
         <div class="modal-content glass-card">
             <span class="close-btn" onclick="closeModal('photo-modal')">&times;</span>
@@ -176,6 +185,7 @@
         </div>
     </div>
 
+    <!-- Lightbox para Imagens Expandidas -->
     <div id="lightbox-modal" class="modal lightbox" onclick="closeModal('lightbox-modal')">
         <span class="close-btn">&times;</span>
         <img id="lightbox-img" src="" alt="Imagem Ampliada">

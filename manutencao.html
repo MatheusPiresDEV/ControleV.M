@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExploreHorizon - Gestão de Manutenção e Consumo</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="manutencao.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(rgba(10, 14, 26, 0.88), rgba(10, 14, 26, 0.98)),
+                url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Otimização para Monitores Grandes e Ultrawide */
+        .main-container {
+            max-width: 1650px;
+            margin: 100px auto 0 auto;
+            padding: 20px 40px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 26px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .modern-input-group {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .modern-input-group label {
+            font-size: 0.82rem;
+            color: #00f5d4;
+            margin-bottom: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 14px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .input-wrapper input,
+        .input-wrapper select,
+        .input-wrapper textarea {
+            width: 100%;
+            padding: 12px 12px 12px 42px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper input:focus,
+        .input-wrapper select:focus {
+            border-color: #00f5d4;
+            box-shadow: 0 0 12px rgba(0, 245, 212, 0.25);
+        }
+
+        .btn-modern {
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-modern-primary {
+            background: #00f5d4;
+            color: #03050a;
+        }
+
+        .btn-modern-primary:hover {
+            background: #00bbf9;
+            box-shadow: 0 0 15px rgba(0, 187, 249, 0.4);
+        }
+
+        /* Grid Layout de Três Colunas para Telas Grandes */
+        .dashboard-layout-grid {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-layout-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-layout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Lista de Checklist/Lembretes */
+        .reminder-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .reminder-item input[type="checkbox"] {
+            accent-color: #00f5d4;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div id="toast-container"></div>
+
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <i class="fa-solid fa-compass animate-compass"></i> Explore<span>Horizon</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="backup.html" class="nav-link">Backup & Transf.</a>
+                <a href="#" class="nav-link active">Garagem & Custos</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <section class="glass-card" style="margin-bottom: 24px;">
+            <h2><i class="fa-solid fa-motorcycle" style="color: #00f5d4;"></i> Configuração da Garagem</h2>
+            <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 15px;">
+                <div class="modern-input-group" style="flex: 2; min-width: 220px;">
+                    <label>Modelo do Veículo</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="veh-model" placeholder="Ex: Yamaha Lander 250">
+                        <i class="fa-solid fa-motorcycle"></i>
+                    </div>
+                </div>
+                <div class="modern-input-group" style="flex: 1; min-width: 160px;">
+                    <label>Odômetro Atual (KM)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="veh-km" placeholder="Ex: 47520">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
+                </div>
+                <div class="modern-input-group" style="flex: 1; min-width: 160px;">
+                    <label>Óleo Atual Iniciado em (KM)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="veh-oil-start" placeholder="Ex: 47000">
+                        <i class="fa-solid fa-play"></i>
+                    </div>
+                </div>
+                <div class="modern-input-group" style="flex: 1; min-width: 160px;">
+                    <label>Troca de Óleo a cada (KM)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="veh-oil-interval" placeholder="Ex: 5000" value="5000">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                </div>
+                <div class="modern-input-group"
+                    style="flex: 1; min-width: 150px; display: flex; justify-content: flex-end;">
+                    <button class="btn-modern btn-modern-primary" onclick="saveVehicleSettings()"
+                        style="width: 100%; height: 45px; margin-bottom: 15px;"><i class="fa-solid fa-floppy-disk"></i>
+                        Salvar</button>
+                </div>
+            </div>
+        </section>
+
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 24px;">
+            <div class="stat-card glass-card" style="border-left: 4px solid #00f5d4;">
+                <p style="margin: 0 0 10px 0; opacity: 0.7; font-size: 0.9rem;">STATUS DO ÓLEO DO MOTOR</p>
+                <h3 id="card-oil-status" style="margin: 0; font-size: 1.7rem;">---</h3>
+                <small id="card-oil-sub" style="opacity: 0.6;">Carregando...</small>
+            </div>
+            <div class="stat-card glass-card" style="border-left: 4px solid #00bbf9;">
+                <p style="margin: 0 0 10px 0; opacity: 0.7; font-size: 0.9rem;">MÉDIA DE CONSUMO REAL</p>
+                <h3 id="card-consumption" style="margin: 0; font-size: 1.7rem;">0.0 km/L</h3>
+                <small style="opacity: 0.6;">Requer min. 2 abastecimentos</small>
+            </div>
+            <div class="stat-card glass-card" style="border-left: 4px solid #ff85a1;">
+                <p style="margin: 0 0 10px 0; opacity: 0.7; font-size: 0.9rem;">CUSTO POR KM RODADO</p>
+                <h3 id="card-cost-per-km" style="margin: 0; font-size: 1.7rem;">R$ 0,00 / KM</h3>
+                <small style="opacity: 0.6;">Combustível + Oficina</small>
+            </div>
+            <div class="stat-card glass-card" style="border-left: 4px solid #ffb703;">
+                <p style="margin: 0 0 10px 0; opacity: 0.7; font-size: 0.9rem;">PREÇO MÉDIO DO LITRO</p>
+                <h3 id="card-avg-fuel-price" style="margin: 0; font-size: 1.7rem;">R$ 0,00</h3>
+                <small style="opacity: 0.6;">Média ponderada do painel</small>
+            </div>
+        </div>
+
+        <div class="dashboard-layout-grid">
+
+            <div class="glass-card">
+                <h3><i class="fa-solid fa-gas-pump" style="color: #00bbf9;"></i> Registrar Abastecimento</h3>
+                <div style="margin-top: 15px;">
+                    <div class="modern-input-group">
+                        <label>KM Atual no Painel</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="fuel-km" placeholder="Ex: 47824">
+                            <i class="fa-solid fa-gauge"></i>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 15px;">
+                        <div class="modern-input-group" style="flex: 1;">
+                            <label>Litros Adicionados</label>
+                            <div class="input-wrapper">
+                                <input type="number" step="0.01" id="fuel-liters" placeholder="Ex: 12">
+                                <i class="fa-solid fa-droplet"></i>
+                            </div>
+                        </div>
+                        <div class="modern-input-group" style="flex: 1;">
+                            <label>Valor Total Pago (R$)</label>
+                            <div class="input-wrapper">
+                                <input type="number" step="0.01" id="fuel-price" placeholder="Ex: 70.00">
+                                <i class="fa-solid fa-dollar-sign"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modern-input-group">
+                        <label>Data</label>
+                        <div class="input-wrapper">
+                            <input type="date" id="fuel-date">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </div>
+                    </div>
+                    <button class="btn-modern" onclick="addFuelRecord()"
+                        style="background: #00bbf9; color: #fff; width: 100%; padding: 13px; margin-top: 5px;"><i
+                            class="fa-solid fa-plus"></i> Lançar Combustível</button>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <h3><i class="fa-solid fa-wrench" style="color: #ff85a1;"></i> Registrar Oficina / Peças</h3>
+                <div style="margin-top: 15px;">
+                    <div class="modern-input-group">
+                        <label>Tipo de Registro</label>
+                        <div class="input-wrapper">
+                            <select id="maint-type">
+                                <option value="Preventiva">Manutenção Preventiva</option>
+                                <option value="Corretiva">Manutenção Corretiva</option>
+                                <option value="Troca de Óleo">Troca de Óleo</option>
+                                <option value="Modificação">Modificação / Acessório</option>
+                            </select>
+                            <i class="fa-solid fa-list"></i>
+                        </div>
+                    </div>
+                    <div class="modern-input-group">
+                        <label>Descrição do Serviço / Peça</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="maint-desc" placeholder="Ex: Vela de Irídium, Filtro de Óleo">
+                            <i class="fa-solid fa-quote-left"></i>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 15px;">
+                        <div class="modern-input-group" style="flex: 1;">
+                            <label>KM da Instalação</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="maint-km" placeholder="Ex: 47000">
+                                <i class="fa-solid fa-map-pin"></i>
+                            </div>
+                        </div>
+                        <div class="modern-input-group" style="flex: 1;">
+                            <label>Custo Total (R$)</label>
+                            <div class="input-wrapper">
+                                <input type="number" step="0.01" id="maint-price" placeholder="Ex: 120.00">
+                                <i class="fa-solid fa-hand-holding-dollar"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modern-input-group">
+                        <label>Data</label>
+                        <div class="input-wrapper">
+                            <input type="date" id="maint-date">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </div>
+                    </div>
+                    <button class="btn-modern" onclick="addMaintRecord()"
+                        style="background: #ff85a1; color: #fff; width: 100%; padding: 13px; margin-top: 5px;"><i
+                            class="fa-solid fa-check"></i> Lançar Registro</button>
+                </div>
+            </div>
+
+            <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <h3><i class="fa-solid fa-thumbtack" style="color: #ffb703;"></i> Lembretes Rápidos</h3>
+                    <div id="reminders-list" style="margin-top: 15px;">
+                    </div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="text" id="new-reminder-text" placeholder="Novo lembrete..."
+                            style="padding: 8px 8px 8px 12px; font-size: 0.9rem;">
+                    </div>
+                    <button class="btn-modern" onclick="addCustomReminder()"
+                        style="background: #ffb703; color: #000; width: 100%; padding: 8px; margin-top: 8px; font-size: 0.9rem;"><i
+                            class="fa-solid fa-plus"></i> Adicionar</button>
+                </div>
+            </div>
+        </div>
+
+        <section class="glass-card" style="margin-bottom: 24px;">
+            <h2><i class="fa-solid fa-shield-heart" style="color: #00f5d4;"></i> Plano de Manutenção Preventiva
+                (Componentes)</h2>
+            <p style="font-size: 0.9rem; opacity: 0.7; margin-bottom: 15px;">Monitoramento inteligente baseado no
+                desgaste teórico e substituições padrão:</p>
+            <div id="preventive-grid"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+            </div>
+        </section>
+
+        <section class="glass-card" style="margin-bottom: 24px;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
+                <h2><i class="fa-solid fa-chart-line" style="color: #00f5d4;"></i> Linha do Tempo de Gastos & Histórico
+                </h2>
+                <div class="input-wrapper" style="width: 180px;">
+                    <select id="filter-period" onchange="renderHistoryAndCharts()" style="padding: 8px 8px 8px 35px;">
+                        <option value="all">Ver Tudo</option>
+                        <option value="week">Esta Semana</option>
+                        <option value="month">Este Mês</option>
+                        <option value="year">Este Ano</option>
+                    </select>
+                    <i class="fa-solid fa-filter" style="left: 10px;"></i>
+                </div>
+            </div>
+
+            <div id="heatmap" class="heatmap-container" style="margin-bottom: 20px;"></div>
+            <div id="history-timeline" style="max-height: 350px; overflow-y: auto; text-align: left; padding: 5px;">
+            </div>
+        </section>
+
+        <section class="glass-card">
+            <h2><i class="fa-solid fa-calculator" style="color: #00bbf9;"></i> Simulador Inteligente de Viagens</h2>
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">Projete com precisão os gastos da sua próxima
+                rota definindo a distância e o preço estimado do combustível.</p>
+
+            <div class="input-row"
+                style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; align-items: flex-end;">
+                <div class="modern-input-group" style="flex: 1; max-width: 280px; margin-bottom: 0;">
+                    <label>Distância da Viagem (KM)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="sim-km" placeholder="Ex: 1800">
+                        <i class="fa-solid fa-route"></i>
+                    </div>
+                </div>
+
+                <div class="modern-input-group" style="flex: 1; max-width: 220px; margin-bottom: 0;">
+                    <label>Preço do Combustível (R$/Litro)</label>
+                    <div class="input-wrapper">
+                        <input type="number" step="0.01" id="sim-fuel-price" placeholder="Ex: 5.85">
+                        <i class="fa-solid fa-gas-pump"></i>
+                    </div>
+                </div>
+
+                <button class="btn-modern btn-modern-primary" onclick="runTripSimulation()"
+                    style="padding: 0 24px; height: 45px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Simular
+                    Custos</button>
+            </div>
+
+            <div id="simulation-result"
+                style="margin-top: 25px; font-size: 1.1rem; line-height: 1.6; text-align: left; display: none; padding: 20px; background: rgba(0,0,0,0.5); border-radius: 8px; border-left: 4px solid #00f5d4;">
+            </div>
+        </section>
+
+    </main>
+
+    <script src="manutencao.js"></script>
+</body>
+
+</html>

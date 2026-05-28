@@ -1,0 +1,144 @@
+/* --- CONFIGURAÇÃO DE LAYOUT (DASHBOARDS ESTILO POWER BI) --- */
+
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.section-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+/* Responsividade para telas menores (Celulares) */
+@media (max-width: 768px) {
+    .section-split { 
+        grid-template-columns: 1fr; 
+    }
+}
+
+/* --- MAPA DE CALOR DE GASTOS (ESTILO GITHUB ATIVIDADES) --- */
+
+.heatmap-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    justify-content: center;
+}
+
+.heatmap-day {
+    width: 14px;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+.heatmap-day:hover {
+    transform: scale(1.2);
+    z-index: 5;
+}
+
+/* Tooltip flutuante ao passar o mouse nos blocos do mapa de calor */
+.heatmap-day:hover::after {
+    content: attr(data-info);
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #03050a;
+    color: #ffffff;
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 10;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* --- AJUSTES DA TIMELINE DE HISTÓRICO --- */
+
+#history-timeline::-webkit-scrollbar {
+    width: 6px;
+}
+
+#history-timeline::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+#history-timeline::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+#history-timeline::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-neon, #00f5d4);
+}
+
+/* --- COMPONENTES NOVOS ADICIONADOS PARA UNIFICAÇÃO (SELECTS) --- */
+
+/* Select grande do formulário de oficina */
+.global-select {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+    color: #fff !important;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    appearance: none; /* Remove a seta padrão feia do navegador */
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2300f5d4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 16px !important;
+}
+
+.global-select:focus {
+    outline: none;
+    border-color: #00f5d4 !important;
+    box-shadow: 0 0 12px rgba(0, 245, 212, 0.2);
+    background: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Select menor do filtro do mapa de calor */
+.global-select-short {
+    padding: 8px 32px 8px 12px;
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 6px !important;
+    color: #fff !important;
+    font-size: 0.9rem;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 10px center !important;
+    background-size: 12px !important;
+}
+
+.global-select-short:focus {
+    outline: none;
+    border-color: #00f5d4 !important;
+}
+
+/* Estilização básica das opções internas do select para não quebrar no Windows/Linux */
+.global-select option,
+.global-select-short option {
+    background: #03050a;
+    color: #fff;
+}
